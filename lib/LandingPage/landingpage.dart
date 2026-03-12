@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
 import "package:web300_socialgo/LandingPage/sections/before_after.dart";
 import "package:web300_socialgo/LandingPage/sections/feature_overview.dart";
+import "package:web300_socialgo/LandingPage/sections/free_tier_feature.dart";
 import "package:web300_socialgo/LandingPage/sections/hero.dart";
 import "package:web300_socialgo/LandingPage/sections/navbar.dart";
+import "package:web300_socialgo/LandingPage/sections/pricing_sector.dart";
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -46,8 +48,8 @@ SizedBox(
   HeroSection(),
   FeatureOverview(),
   ComparisonSection(),
-  
- 
+ FeaturesDiscovery(),
+PricingSection()
 
 
 
