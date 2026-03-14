@@ -1,7 +1,9 @@
 
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:web300_socialgo/Authentication/Pages/Login.dart';
+import 'package:web300_socialgo/webapp/Pages/dashboard.dart';
 
 class Navbar extends StatelessWidget implements PreferredSizeWidget {
   const Navbar({super.key});
@@ -74,7 +76,28 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
 
            
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                User? user = FirebaseAuth.instance.currentUser;
+                 if (user != null) {
+    // 1. User is already logged in -> Go to Dashboard
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) =>  DashboardPage()),
+    );
+  } else {
+    // 2. No user found -> Go to Login Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );  
+    };
+              },
+
+
+ 
+            
+
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -91,6 +114,8 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
                   fontSize: 15,
                 ),
               ),
+            
+            
             ),
           ],
         ),

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:web300_socialgo/LandingPage/landingpage.dart';
+import 'package:firebase_core/firebase_core.dart'; // Fixes 'Firebase'
+import 'firebase_options.dart'; // Fixes 'DefaultFirebaseOptions'
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 

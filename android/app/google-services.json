@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "748223532351",
+    "project_id": "fir-project-practice-9ac0d",
+    "storage_bucket": "fir-project-practice-9ac0d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748223532351:android:9ed6a4537b9b91468fd78a",
+        "android_client_info": {
+          "package_name": "com.example.web300_socialgo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA613Dgn8z49zrF9KGJWW5zwkz4vRSFjzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
