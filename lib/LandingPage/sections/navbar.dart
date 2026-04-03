@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:web300_socialgo/Authentication/Pages/Login.dart';
-import 'package:web300_socialgo/webapp/Pages/dashboard.dart';
+import 'package:web300_socialgo/Authentication/Pages/Utilities/wraper.dart';
+import 'package:web300_socialgo/webapp/app.dart';
+
 
 class Navbar extends StatelessWidget implements PreferredSizeWidget {
   const Navbar({super.key});
@@ -82,13 +84,13 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
     // 1. User is already logged in -> Go to Dashboard
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) =>  DashboardPage()),
+      MaterialPageRoute(builder: (context) =>  MainLayout()),
     );
   } else {
     // 2. No user found -> Go to Login Page
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => wraper()),
     );  
     };
               },
