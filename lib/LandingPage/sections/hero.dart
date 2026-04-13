@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:web300_socialgo/Authentication/Pages/Login.dart';
+import 'package:web300_socialgo/Authentication/Pages/Utilities/wraper.dart';
+import 'package:web300_socialgo/webapp/app.dart';
 
 class HeroSection extends StatelessWidget {
-  const HeroSection({super.key});
+  final VoidCallback? onGetStarted;
+
+ 
+  const HeroSection({super.key, this.onGetStarted});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +56,21 @@ class HeroSection extends StatelessWidget {
 
           // 3. CALL TO ACTION BUTTON
           ElevatedButton(
-            onPressed: () {},
+               onPressed: () {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // If logged in, go to App
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MainLayout()),
+      );
+    } else {
+      // If NOT logged in, tell the parent (wraper) to show Login
+      if (onGetStarted != null) {
+        onGetStarted!(); 
+      }
+    }
+  },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,

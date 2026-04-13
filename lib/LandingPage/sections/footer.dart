@@ -28,7 +28,7 @@ class FooterSection extends StatelessWidget {
                         const Icon(Icons.eco, color: Colors.orange, size: 28),
                         const SizedBox(width: 8),
                         Text(
-                          "contant.io",
+                          "SocialGo",
                           style: GoogleFonts.dmSans(
                             color: Colors.white,
                             fontSize: 24,
@@ -40,7 +40,7 @@ class FooterSection extends StatelessWidget {
                     const SizedBox(height: 15),
                     // Tagline
                     Text(
-                      "Create engaging content in minutes with AI. Join thousands of creators who\ntrust Contantlo to amplify their professional voice.",
+                      "Create engaging content in minutes with AI. Join thousands of creators who\ntrust SocialGo to amplify their professional voice.",
                       style: GoogleFonts.dmSans(
                         color: Colors.grey.shade500,
                         fontSize: 14,
@@ -70,7 +70,7 @@ class FooterSection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "© 2026 Contantlo. All rights reserved.",
+                  "© 2026 SociaGo. All rights reserved.",
                   style: GoogleFonts.dmSans(
                     color: Colors.grey.shade600,
                     fontSize: 12,

@@ -27,7 +27,11 @@ class _PostGenScreenState extends State<PostGenScreen> {
 
     try {
       final url = Uri.parse(
-          'https://abuyousufmdjumman.n8nclouds.com/webhook/993e94b5-bbd7-4a79-88e3-c3cfffcccc2c');
+          // 'https://abuyousufmdjumman.n8nclouds.com/webhook/993e94b5-bbd7-4a79-88e3-c3cfffcccc2c'
+          
+          'https://abuyousufmdjumman.n8nclouds.com/webhook-test/993e94b5-bbd7-4a79-88e3-c3cfffcccc2c'
+          
+          );
 
       final response = await http.post(
         url,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:web300_socialgo/Authentication/Pages/Utilities/wraper.dart';
 
 class PricingSection extends StatelessWidget {
   const PricingSection({super.key});
@@ -8,7 +9,7 @@ class PricingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.black, // Dark background as per reference image
+      color: Colors.black,
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 20),
       child: Column(
         children: [
@@ -21,63 +22,45 @@ class PricingSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 60),
-          
-          // 1. WRAP FOR RESPONSIVE PRICING CARDS
+
           Wrap(
             spacing: 20,
             runSpacing: 30,
             alignment: WrapAlignment.center,
             children: [
               _buildPricingCard(
+                context: context,
                 planName: "Free",
                 price: "Free",
                 features: [
                   "40k Credits on First Sign Up",
                   "1 Free Post Daily",
                   "Topic To Post",
-                  "Image To Post",
-                  "60 Personalized Topics Generate/month",
-                  "Save 40 Engagement Lists",
-                  "Ai Comment Generator",
                 ],
               ),
               _buildPricingCard(
+                context: context,
                 planName: "Starter",
                 price: "\$11",
-                isPopular: true, // Optional: highlight the middle card
+                isPopular: true,
                 features: [
                   "250k Ai Credits",
                   "Topic To Post",
-                  "Image To Post",
-                  "PDF To Post",
-                  "Article To Post",
-                  "YouTube Video To Post",
-                  "Schedule Post",
+                  "LinkedIn Lead gen",
                   "30 personalized posts/month",
-                  "Unlimited Personalized Topic Generation",
-                  "Schedule Follow Up Comment On Posts",
-                  "Company Page Post Scheduling",
-                  "Save 300 Engagement Lists",
-                  "Ai Comment Generator",
+                  "50 leads per month",
                 ],
               ),
               _buildPricingCard(
+                context: context,
                 planName: "Pro",
                 price: "\$19",
                 features: [
-                  "500k Ai Credits",
+                  "1000k Ai Credits",
                   "Topic To Post",
-                  "Image To Post",
-                  "PDF To Post",
-                  "Article To Post",
-                  "YouTube Video To Post",
-                  "Schedule Post",
-                  "Unlimited personalized posts",
-                  "Unlimited Personalized Topic Generation",
-                  "Schedule Follow Up Comment On Posts",
-                  "Company Page Post Scheduling",
-                  "Save unlimited Engagement Lists",
-                  "Ai Comment Generator",
+                  "LinkedIn Lead gen",
+                  "100 personalized posts/month",
+                  "250 leads per month",
                 ],
               ),
             ],
@@ -88,6 +71,7 @@ class PricingSection extends StatelessWidget {
   }
 
   Widget _buildPricingCard({
+    required BuildContext context,
     required String planName,
     required String price,
     required List<String> features,
@@ -121,7 +105,7 @@ class PricingSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 30),
-          // FEATURE LIST
+
           ...features.map((feature) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
@@ -141,12 +125,20 @@ class PricingSection extends StatelessWidget {
                   ],
                 ),
               )),
+
           const SizedBox(height: 30),
-          // CTA BUTTON
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  wraper(),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(vertical: 20),

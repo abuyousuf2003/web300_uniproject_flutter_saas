@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:web300_socialgo/Authentication/Pages/Login.dart';
+import 'package:web300_socialgo/Authentication/Pages/Utilities/wraper.dart';
+import 'package:web300_socialgo/webapp/app.dart';
 
 class ComparisonSection extends StatelessWidget {
-  const ComparisonSection({super.key});
+  final VoidCallback? onGetStarted; 
+
+  const ComparisonSection({super.key, this.onGetStarted});
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -10,9 +19,10 @@ class ComparisonSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 20),
       child: Column(
         children: [
-          // 1. HEADER
+
+          // HEADER
           Text(
-            "Tired of spending hours writing\nyour next LinkedIn post?",
+            "Still manually writing posts\nand searching for leads?",
             textAlign: TextAlign.center,
             style: GoogleFonts.dmSans(
               fontSize: 36,
@@ -21,66 +31,90 @@ class ComparisonSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+
           Text(
-            "Contantio brings your ideas to life in just a few clicks.",
+            "SocialGo automates your content creation and lead generation in one workflow.",
             textAlign: TextAlign.center,
             style: GoogleFonts.dmSans(
               fontSize: 18,
               color: const Color(0xFF4A5568),
             ),
           ),
+
           const SizedBox(height: 60),
 
-          // 2. COMPARISON CARDS
+          // COMPARISON CARDS
           Wrap(
             spacing: 30,
             runSpacing: 30,
             alignment: WrapAlignment.center,
             children: [
-              // Before Card
+
+              // BEFORE
               _buildComparisonCard(
-                title: "Before...",
+                title: "Before SocialGo",
                 titleColor: const Color(0xFF1A202C),
                 items: [
-                  "I don't have any ideas for content.",
-                  "I spend hours writing my posts.",
-                  "I don't have any results.",
-                  "I can't seem to keep up.",
-                  "I can't analyze my content.",
+                  "Struggling to find content ideas every day",
+                  "Spending hours writing and editing LinkedIn posts",
+                  "Posting inconsistently due to lack of time",
+                  "Manually searching for potential leads",
+                  "No clear system to scale outreach",
                 ],
                 isSuccess: false,
               ),
-              // After Card
+
+              // AFTER
               _buildComparisonCard(
-                title: "With Contantio",
+                title: "With SocialGo",
                 titleColor: Colors.orange,
                 items: [
-                  "Write Unlimited Posts Using Your API for Free",
-                  "Create LinkedIn posts in just a few clicks",
-                  "Adapt your posts to your audience and writing style",
-                  "Schedule your posts for upcoming weeks",
-                  "Analyze your post metrics in one place",
+                  "Generate post ideas + content instantly using AI",
+                  "Turn one topic into a full LinkedIn post in seconds",
+                  "Maintain consistent posting without effort",
+                  "Find targeted leads based on industry & role",
+                  "Get real LinkedIn profiles with verified emails",
                 ],
                 isSuccess: true,
               ),
             ],
           ),
-          
+
           const SizedBox(height: 60),
 
-          // 3. CTA BUTTON
+          // CTA
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // If logged in, go to App
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MainLayout()),
+      );
+    } else {
+      // If NOT logged in, tell the parent (wraper) to show Login
+      if (onGetStarted != null) {
+        onGetStarted!(); 
+      }
+    }
+  },
+ 
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 22),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(
-              "Try Contantio →",
-              style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 16),
+              "Start Automating Your Workflow →",
+              style: GoogleFonts.dmSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
         ],
@@ -100,7 +134,11 @@ class ComparisonSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isSuccess ? Colors.orange.withOpacity(0.2) : Colors.grey.shade200),
+        border: Border.all(
+          color: isSuccess
+              ? Colors.orange.withOpacity(0.2)
+              : Colors.grey.shade200,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -121,6 +159,7 @@ class ComparisonSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 25),
+
           ...items.map((item) => _buildListItem(item, isSuccess)).toList(),
         ],
       ),
@@ -133,7 +172,9 @@ class ComparisonSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isSuccess ? const Color(0xFFFFF7F2) : const Color(0xFFFFF5F5),
+          color: isSuccess
+              ? const Color(0xFFFFF7F2)
+              : const Color(0xFFFFF5F5),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(

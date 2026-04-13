@@ -9,9 +9,9 @@ import "package:web300_socialgo/LandingPage/sections/navbar.dart";
 import "package:web300_socialgo/LandingPage/sections/pricing_sector.dart";
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+ final VoidCallback? onGetStarted;
 
-
+  const MyHomePage({super.key, this.onGetStarted});
 
 
   @override
@@ -19,51 +19,77 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final ScrollController _scrollController = ScrollController();
 
+  final GlobalKey featuresKey = GlobalKey();
+  final GlobalKey pricingKey = GlobalKey();
+  final GlobalKey faqKey = GlobalKey();
 
- 
+  void scrollTo(GlobalKey key) {
+  final context = key.currentContext;
+  if (context != null) {
+    Scrollable.ensureVisible(
+      context,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
-      
       body: Container(
-
-        decoration: BoxDecoration(
-  gradient: RadialGradient(
-    center: Alignment(0.8, -0.5), // Position the "glow"
-    radius: 1.5,
-    colors: [Color(0xFFFFF5EE), Colors.white],
-  ),
-),
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0.8, -0.5),
+            radius: 1.5,
+            colors: [Color(0xFFFFF5EE), Colors.white],
+          ),
+        ),
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
+          controller: _scrollController,
           child: Column(
             children: [
-// Navbar
-SizedBox(
+
+              // NAVBAR
+             SizedBox(
   width: double.maxFinite,
   height: 60,
-  child: Navbar()),
+  child: Navbar(
+    onGetStarted: widget.onGetStarted, 
+  ),
+),
 
-  HeroSection(),
-  FeatureOverview(),
-  ComparisonSection(),
- FeaturesDiscovery(),
-PricingSection(),
-FAQSection(),
-FooterSection()
+              HeroSection(onGetStarted: widget.onGetStarted,),
 
+              // FEATURES SECTION
+              Container(
+                key: featuresKey,
+                child: FeatureOverview(onGetStarted: widget.onGetStarted,),
+              ),
 
+              ComparisonSection(onGetStarted: widget.onGetStarted,),
 
+              FeaturesDiscovery(),
 
+              // PRICING
+              Container(
+                key: pricingKey,
+                child: PricingSection(),
+              ),
 
+              // FAQ
+              Container(
+                key: faqKey,
+                child: FAQSection(),
+              ),
+
+              FooterSection(),
             ],
           ),
         ),
-      )
-    
+      ),
     );
   }
 }
