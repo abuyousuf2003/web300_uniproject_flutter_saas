@@ -1,679 +1,565 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart'; // Required for Clipboard
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
-// import 'package:url_launcher/url_launcher.dart'; // Required for LinkedIn Links
-
-// class LinkedInLeadGenScreen extends StatefulWidget {
-//   const LinkedInLeadGenScreen({super.key});
-
-//   @override
-//   State<LinkedInLeadGenScreen> createState() => _LinkedInLeadGenScreenState();
-// }
-
-// class _LinkedInLeadGenScreenState extends State<LinkedInLeadGenScreen> {
-//   // Controllers for the 9 targeting fields
-//   final TextEditingController _jobTitleController = TextEditingController();
-//   final TextEditingController _roleController = TextEditingController();
-//   final TextEditingController _departmentController = TextEditingController();
-//   final TextEditingController _locationController = TextEditingController();
-//   final TextEditingController _industryController = TextEditingController();
-//   final TextEditingController _companySizeController = TextEditingController();
-//   final TextEditingController _revenueController = TextEditingController();
-//   final TextEditingController _specialitiesController = TextEditingController();
-//   final TextEditingController _platformController = TextEditingController();
-
-//   bool _loading = false;
-//   List<Map<String, dynamic>> _leads = [];
-
-//   // Design Constants (Using hex to avoid initialization crashes)
-//   final Color primaryColor = const Color(0xFFF54A00); 
-//   final Color primaryLight = const Color(0xFFFFEEE5); 
-//   final Color backgroundColor = const Color(0xFFF9FAFB);
-//   final Color cardColor = Colors.white;
-
-//   // n8n Webhook Integration
-//   Future<void> _fetchLeads() async {
-//     setState(() {
-//       _loading = true;
-//       _leads = [];
-//     });
-
-//     final body = {
-//       "job_title": _jobTitleController.text,
-//       "role": _roleController.text,
-//       "department": _departmentController.text,
-//       "location": _locationController.text,
-//       "industry": _industryController.text,
-//       "company_size": _companySizeController.text,
-//       "revenue": _revenueController.text,
-//       "specialities": _specialitiesController.text,
-//       "platform": _platformController.text,
-//       "submission_id": DateTime.now().millisecondsSinceEpoch.toString(),
-//     };
-
-//     try {
-//       final response = await http.post(
-//         Uri.parse("https://abuyousufmdjumman.n8nclouds.com/webhook/f9a40868-7359-47ee-bece-dc62d26237d3"),
-//         headers: {"Content-Type": "application/json"},
-//         body: jsonEncode(body),
-//       );
-
-//       if (response.statusCode == 200) {
-//         final dynamic decodedData = jsonDecode(response.body);
-//         setState(() {
-//           if (decodedData is List) {
-//             _leads = List<Map<String, dynamic>>.from(decodedData);
-//           } else if (decodedData is Map) {
-//             _leads = [Map<String, dynamic>.from(decodedData)];
-//           }
-//         });
-//       }
-//     } catch (e) {
-//       debugPrint("Connection Error: $e");
-//     } finally {
-//       setState(() => _loading = false);
-//     }
-//   }
-
-//   // Helper to launch LinkedIn URLs
-//   Future<void> _launchURL(String? urlString) async {
-//     if (urlString == null || urlString.isEmpty) {
-//       _showToast("No URL available");
-//       return;
-//     }
-//     final Uri url = Uri.parse(urlString);
-//     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-//       _showToast("Could not launch $urlString");
-//     }
-//   }
-
-//   void _showToast(String message) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating, width: 280),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: backgroundColor,
-//       body: Row(
-//         children: [
-//           // Left Sidebar: Form
-//           Container(
-//             width: 320,
-//             decoration: BoxDecoration(
-//               color: cardColor,
-//               border: Border(right: BorderSide(color: Colors.grey.shade200)),
-//             ),
-//             child: Column(
-//               children: [
-//                 _buildSidebarHeader(),
-//                 Expanded(
-//                   child: ListView(
-//                     padding: const EdgeInsets.symmetric(horizontal: 20),
-//                     children: [
-//                       _buildSectionTitle("Targeting Criteria"),
-//                       _buildTextField(_jobTitleController, "Job Title", Icons.work_outline),
-//                       _buildTextField(_roleController, "Role", Icons.person_search_outlined),
-//                       _buildTextField(_departmentController, "Department", Icons.business_outlined),
-//                       _buildTextField(_locationController, "Location", Icons.location_on_outlined),
-//                       _buildTextField(_industryController, "Industry", Icons.factory_outlined),
-//                       _buildTextField(_companySizeController, "Company Size", Icons.groups_outlined),
-//                       _buildTextField(_revenueController, "Revenue", Icons.monetization_on_outlined),
-//                       _buildTextField(_specialitiesController, "Specialities", Icons.star_border),
-//                       _buildTextField(_platformController, "Platform", Icons.computer_outlined),
-//                       const SizedBox(height: 24),
-//                       _buildSearchButton(),
-//                       const SizedBox(height: 40),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           // Right Main Area: Results
-//           Expanded(
-//             child: _loading 
-//               ? Center(child: CircularProgressIndicator(color: primaryColor))
-//               : _leads.isEmpty 
-//                 ? _buildEmptyState() 
-//                 : _buildResultsArea(),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildSidebarHeader() {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-//       child: Row(
-//         children: [
-//           Icon(Icons.bolt, color: primaryColor, size: 28),
-//           const SizedBox(width: 12),
-//           const Text("Social Leads", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildSectionTitle(String title) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 12, top: 10),
-//       child: Text(title.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.1)),
-//     );
-//   }
-
-//   Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 6),
-//       child: TextField(
-//         controller: controller,
-//         style: const TextStyle(fontSize: 14),
-//         decoration: InputDecoration(
-//           isDense: true,
-//           prefixIcon: Icon(icon, size: 18, color: Colors.grey.shade400),
-//           hintText: label,
-//           filled: true,
-//           fillColor: const Color(0xFFF3F4F6),
-//           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildSearchButton() {
-//     return SizedBox(
-//       width: double.infinity, height: 50,
-//       child: ElevatedButton(
-//         onPressed: _loading ? null : _fetchLeads,
-//         style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-//         child: const Text("Find Leads", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-//       ),
-//     );
-//   }
-
-//   Widget _buildResultsArea() {
-//     return ListView(
-//       padding: const EdgeInsets.all(40),
-//       children: [
-//         Text("Search Results (${_leads.length})", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-//         const SizedBox(height: 24),
-//         ..._leads.map((lead) => _buildLeadCard(lead)).toList(),
-//       ],
-//     );
-//   }
-
-//   Widget _buildLeadCard(Map<String, dynamic> lead) {
-//     final String email = lead['email'] ?? 'N/A';
-//     final String? linkedInUrl = lead['linkedinurl']; // Ensure n8n sends this key
-
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 16),
-//       padding: const EdgeInsets.all(20),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(16),
-//         border: Border.all(color: Colors.grey.shade100),
-//         boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 4))],
-//       ),
-//       child: Row(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Container(
-//             width: 50, height: 50,
-//             decoration: BoxDecoration(color: primaryLight, borderRadius: BorderRadius.circular(12)),
-//             child: Center(child: Text(lead['name']?[0]?.toUpperCase() ?? 'L', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 18))),
-//           ),
-//           const SizedBox(width: 20),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(lead['name'] ?? 'Unknown Lead', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//                 const SizedBox(height: 4),
-//                 Row(
-//                   children: [
-//                     Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
-//                     const SizedBox(width: 4),
-//                     Text(lead['location'] ?? 'Global', style: TextStyle(color: Colors.grey.shade600)),
-//                     const SizedBox(width: 12),
-//                     Icon(Icons.business_center_outlined, size: 14, color: Colors.grey.shade500),
-//                     const SizedBox(width: 4),
-//                     Text(lead['industry'] ?? 'Industry', style: TextStyle(color: Colors.grey.shade600)),
-//                   ],
-//                 ),
-//                 const SizedBox(height: 12),
-//                 // COPYABLE EMAIL FIELD
-//                 GestureDetector(
-//                   onTap: () {
-//                     Clipboard.setData(ClipboardData(text: email));
-//                     _showToast("Email copied to clipboard");
-//                   },
-//                   child: MouseRegion(
-//                     cursor: SystemMouseCursors.click,
-//                     child: Container(
-//                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-//                       decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade200)),
-//                       child: Row(
-//                         mainAxisSize: MainAxisSize.min,
-//                         children: [
-//                           Icon(Icons.copy_rounded, size: 14, color: primaryColor),
-//                           const SizedBox(width: 8),
-//                           Text(email, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-//                         ],
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           // LINKEDIN ACTION BUTTON
-//           ElevatedButton.icon(
-//             onPressed: () => _launchURL(linkedInUrl),
-//             icon: const Icon(Icons.open_in_new, size: 14),
-//             label: const Text("LinkedIn"),
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: const Color(0xFF0A66C2), 
-//               foregroundColor: Colors.white, 
-//               elevation: 0, 
-//               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildEmptyState() {
-//     return Center(
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Icon(Icons.person_search_outlined, size: 80, color: Colors.grey.shade200),
-//           const SizedBox(height: 16),
-//           const Text("Ready to find leads?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//           Text("Fill out the forms on the left to begin.", style: TextStyle(color: Colors.grey.shade500)),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-class LinkedInLeadGenScreen extends StatefulWidget {
-  const LinkedInLeadGenScreen({super.key});
+// Native imports
+import 'dart:io' show Platform, File, Process;
+import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
 
-  @override
-  State<LinkedInLeadGenScreen> createState() => _LinkedInLeadGenScreenState();
+// Web-specific import (handled safely)
+import 'dart:html' as html if (dart.library.io) 'package:flutter/material.dart';
+
+void main() => runApp(const MaterialApp(home: LinkedInLeadGen(), debugShowCheckedModeBanner: false));
+
+class Lead {
+  final String name, email, linkedin, industry, location;
+
+  Lead({
+    required this.name,
+    required this.email,
+    required this.linkedin,
+    required this.industry,
+    required this.location,
+  });
+
+  factory Lead.fromJson(Map<String, dynamic> json) => Lead(
+        name: json['name'] ?? 'Unknown',
+        email: json['email'] ?? 'N/A',
+        linkedin: json['linkedinurl'] ?? '',
+        industry: json['industry'] ?? 'N/A',
+        location: json['location'] ?? 'N/A',
+      );
 }
 
-class _LinkedInLeadGenScreenState extends State<LinkedInLeadGenScreen> {
-  // Controllers
-  final TextEditingController _jobTitleController = TextEditingController();
-  final TextEditingController _roleController = TextEditingController();
-  final TextEditingController _departmentController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _industryController = TextEditingController();
-  final TextEditingController _companySizeController = TextEditingController();
-  final TextEditingController _revenueController = TextEditingController();
-  final TextEditingController _specialitiesController = TextEditingController();
-  final TextEditingController _platformController = TextEditingController();
+class LinkedInLeadGen extends StatefulWidget {
+  const LinkedInLeadGen({super.key});
+  @override
+  State<LinkedInLeadGen> createState() => _LinkedInLeadGenState();
+}
 
-  bool _loading = false;
-  List<Map<String, dynamic>> _leads = [];
+class _LinkedInLeadGenState extends State<LinkedInLeadGen> {
+  final List<String> _countries = [
+    "United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "India",
+    "Singapore", "Netherlands", "United Arab Emirates", "Brazil", "Spain", "Italy", "Mexico",
+    "Japan", "Sweden", "Switzerland", "Norway", "Ireland", "New Zealand", "South Africa",
+    "Poland", "Belgium", "Denmark", "Israel"
+  ]..sort();
 
-  // Theme
-  final Color primaryColor = const Color(0xFFF54A00);
-  final Color primaryLight = const Color(0x33F54A00);
+  final List<String> _companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"];
+  final List<String> _seniorityOptions = ["c_suite", "vp", "director", "manager", "senior", "entry", "owner", "partner"];
 
-  final Color backgroundColor = const Color(0xFF0F0F10);
-  final Color cardColor = const Color(0xFF161616);
-  final Color sidebarColor = const Color(0xFF121212);
-  final Color fieldColor = const Color(0xFF1E1E1E);
-  final Color textPrimary = Colors.white;
-  final Color textSecondary = const Color(0xFF9CA3AF);
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _keywordController = TextEditingController();
+  final TextEditingController _countController = TextEditingController(text: "10");
 
-  Future<void> _fetchLeads() async {
-    setState(() {
-      _loading = true;
-      _leads = [];
-    });
+  List<String> _jobTitles = [];
+  List<String> _companyKeywords = [];
+  List<String> _selectedCompanySizes = [];
+  List<String> _selectedSeniority = [];
+  String _selectedCountry = "United States";
+  bool _hasEmail = true;
+  bool _hasPhone = false;
+  bool _isLoading = false;
+  List<Lead> _leads = [];
 
-    final body = {
-      "job_title": _jobTitleController.text,
-      "role": _roleController.text,
-      "department": _departmentController.text,
-      "location": _locationController.text,
-      "industry": _industryController.text,
-      "company_size": _companySizeController.text,
-      "revenue": _revenueController.text,
-      "specialities": _specialitiesController.text,
-      "platform": _platformController.text,
-      "submission_id": DateTime.now().millisecondsSinceEpoch.toString(),
+  // ✅ UNIVERSAL SAVE LOGIC (WEB + WINDOWS + MOBILE)
+  Future<void> _universalDownload(String content, String fileName) async {
+    if (_leads.isEmpty) return;
+
+    if (kIsWeb) {
+      // WEB LOGIC
+      final bytes = utf8.encode(content);
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute("download", fileName)
+        ..click();
+      html.Url.revokeObjectUrl(url);
+      _showSnack("Download started in browser");
+    } else {
+      // NATIVE LOGIC (Windows/Android/iOS)
+      try {
+        String? path;
+        if (Platform.isWindows) {
+          final userProfile = Platform.environment['USERPROFILE'];
+          if (userProfile != null) path = "$userProfile\\Downloads\\$fileName";
+        }
+
+        if (path == null) {
+          final dir = await getApplicationDocumentsDirectory();
+          path = "${dir.path}/$fileName";
+        }
+
+        final file = File(path);
+        await file.writeAsString(content);
+
+        if (Platform.isWindows) {
+          await Process.run('explorer.exe', ['/select,', path]);
+        }
+        _showSnack("File saved to: $path");
+      } catch (e) {
+        _showSnack("Error saving file: $e", isError: true);
+      }
+    }
+  }
+
+  void _showSnack(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: isError ? Colors.redAccent : Colors.green),
+    );
+  }
+
+  Future<void> _downloadCSV() async {
+    List<List<String>> rows = [["Name", "Email", "LinkedIn", "Industry", "Location"]];
+    for (var lead in _leads) {
+      rows.add([lead.name, lead.email, lead.linkedin, lead.industry, lead.location]);
+    }
+    String csvData = const ListToCsvConverter().convert(rows);
+    await _universalDownload(csvData, "leads.csv");
+  }
+
+  Future<void> _downloadHTML() async {
+    StringBuffer htmlBuffer = StringBuffer();
+    htmlBuffer.write("""
+      <html><head><style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #F54A00; color: white; }
+        a { color: #0077B5; text-decoration: none; font-weight: bold; }
+      </style></head><body>
+      <h2>Leads Export</h2><table><tr><th>Name</th><th>Email</th><th>Industry</th><th>LinkedIn</th></tr>
+    """);
+    for (var lead in _leads) {
+      htmlBuffer.write("<tr><td>${lead.name}</td><td>${lead.email}</td><td>${lead.industry}</td><td><a href='${lead.linkedin}'>Profile</a></td></tr>");
+    }
+    htmlBuffer.write("</table></body></html>");
+    await _universalDownload(htmlBuffer.toString(), "leads.html");
+  }
+
+  Future<void> _launchAgent() async {
+    if (_titleController.text.trim().isNotEmpty) {
+      if (!_jobTitles.contains(_titleController.text.trim())) {
+        _jobTitles.add(_titleController.text.trim());
+      }
+      _titleController.clear();
+    }
+    if (_keywordController.text.trim().isNotEmpty) {
+      if (!_companyKeywords.contains(_keywordController.text.trim())) {
+        _companyKeywords.add(_keywordController.text.trim());
+      }
+      _keywordController.clear();
+    }
+
+    setState(() => _isLoading = true);
+
+    final payload = {
+      "companyKeywordIncludes": _companyKeywords,
+      "companySizeIncludes": _selectedCompanySizes,
+      "personTitleIncludes": _jobTitles,
+      "seniorityIncludes": _selectedSeniority,
+      "personLocationCountryIncludes": [_selectedCountry],
+      "hasEmail": _hasEmail,
+      "hasPhone": _hasPhone,
+      "totalResults": int.tryParse(_countController.text) ?? 10,
+      "dontSaveProgress": false,
+      "resetProgress": false,
+      "includeTitleVariants": false,
     };
 
     try {
       final response = await http.post(
         Uri.parse("https://abuyousufmdjumman.n8nclouds.com/webhook/f9a40868-7359-47ee-bece-dc62d26237d3"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
+        body: jsonEncode(payload),
       );
 
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-
-        setState(() {
-          if (decoded is List) {
-            _leads = List<Map<String, dynamic>>.from(decoded);
-          } else {
-            _leads = [Map<String, dynamic>.from(decoded)];
-          }
-        });
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() => _leads = data.map((e) => Lead.fromJson(e)).toList());
       }
+    } catch (e) {
+      _showSnack("Network Error: $e", isError: true);
     } finally {
-      setState(() => _loading = false);
+      setState(() => _isLoading = false);
     }
-  }
-
-  Future<void> _launchURL(String? url) async {
-    if (url == null || url.isEmpty) return;
-    final uri = Uri.parse(url);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
-  void _showToast(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: Row(
+      backgroundColor: Colors.black,
+      body: Stack(
         children: [
-          // SIDEBAR
-          Container(
-            width: 320,
-            color: sidebarColor,
-            child: Column(
-              children: [
-                _buildSidebarHeader(),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      _buildSectionTitle("Targeting Criteria"),
-                      _buildTextField(_jobTitleController, "Job Title", Icons.work_outline),
-                      _buildTextField(_roleController, "Role", Icons.person),
-                      _buildTextField(_departmentController, "Department", Icons.business),
-                      _buildTextField(_locationController, "Location", Icons.location_on),
-                      _buildTextField(_industryController, "Industry", Icons.factory),
-                      _buildTextField(_companySizeController, "Company Size", Icons.groups),
-                      _buildTextField(_revenueController, "Revenue", Icons.monetization_on),
-                      _buildTextField(_specialitiesController, "Specialities", Icons.star_border),
-                      _buildTextField(_platformController, "Platform", Icons.computer),
-                      const SizedBox(height: 20),
-                      _buildSearchButton(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // MAIN AREA
-          Expanded(
-            child: _loading
-                ? Center(child: CircularProgressIndicator(color: primaryColor))
-                : _leads.isEmpty
-                    ? _buildEmptyState()
-                    : _buildResults(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------------- SIDEBAR ----------------
-
-  Widget _buildSidebarHeader() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          Icon(Icons.bolt, color: primaryColor),
-          const SizedBox(width: 10),
-          Text(
-            "Social Leads",
-            style: TextStyle(
-              color: textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: textSecondary,
-          fontSize: 11,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-      TextEditingController controller, String hint, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: controller,
-        style: TextStyle(color: textPrimary),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: textSecondary, size: 18),
-          hintText: hint,
-          hintStyle: TextStyle(color: textSecondary),
-          filled: true,
-          fillColor: fieldColor,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchButton() {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _loading ? null : _fetchLeads,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: const Text(
-          "Find Leads",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-
-
-  Widget _buildResults() {
-    return ListView(
-      padding: const EdgeInsets.all(30),
-      children: [
-        Text(
-          "Results (${_leads.length})",
-          style: TextStyle(
-            color: textPrimary,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 20),
-        ..._leads.map((e) => _buildLeadCard(e)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildLeadCard(Map<String, dynamic> lead) {
-    final String email = lead['email'] ?? 'N/A';
-    final String? linkedInUrl = lead['linkedinurl'];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Avatar
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: primaryLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                (lead['name'] ?? 'L')[0].toUpperCase(),
-                style: TextStyle(
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lead['name'] ?? 'Unknown Lead',
-                  style: TextStyle(
-                    color: textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 14, color: textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      lead['location'] ?? 'Global',
-                      style: TextStyle(color: textSecondary),
-                    ),
+          Row(children: [
+            Container(
+              width: 380,
+              color: const Color(0xFF0D0D0E),
+              padding: const EdgeInsets.all(24),
+              child: SingleChildScrollView(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text("B2B LEAD PRO", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 30),
+                  _label("Job Titles"),
+                  _buildListInput(_titleController, _jobTitles, "e.g. CEO, Founder"),
+                  const SizedBox(height: 20),
+                  _label("Keywords"),
+                  _buildListInput(_keywordController, _companyKeywords, "e.g. SaaS"),
+                  const SizedBox(height: 25),
+                  _label("Target Country"),
+                  _buildDropdown(_countries, _selectedCountry, (val) => setState(() => _selectedCountry = val!)),
+                  const SizedBox(height: 25),
+                  _label("Company Size"),
+                  _buildMultiSelect(_companySizes, _selectedCompanySizes),
+                  const SizedBox(height: 25),
+                  _label("Seniority"),
+                  _buildMultiSelect(_seniorityOptions, _selectedSeniority),
+                  const SizedBox(height: 25),
+                  _label("Data Verification"),
+                  Row(children: [
+                    _toggle("Verified Email", _hasEmail, (v) => setState(() => _hasEmail = v)),
                     const SizedBox(width: 10),
-                    Icon(Icons.business_center_outlined,
-                        size: 14, color: textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      lead['industry'] ?? 'Industry',
-                      style: TextStyle(color: textSecondary),
+                    _toggle("With Phone", _hasPhone, (v) => setState(() => _hasPhone = v)),
+                  ]),
+                  const SizedBox(height: 20),
+                  _label("Fetch Limit"),
+                  _inputField(_countController, "10"),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _launchAgent,
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF54A00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                      child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text("LAUNCH AGENT", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
-                  ],
+                  )
+                ]),
+              ),
+            ),
+            Expanded(child: _buildResultsList()),
+          ]),
+          Positioned(
+            top: 20, right: 20,
+            child: Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _downloadCSV,
+                  icon: const Icon(Icons.table_rows, size: 16),
+                  label: const Text("CSV"),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF54A00)),
                 ),
-                const SizedBox(height: 12),
-
-                // Email copy
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: email));
-                    _showToast("Email copied");
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: fieldColor,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.copy, size: 14, color: primaryColor),
-                        const SizedBox(width: 6),
-                        Text(
-                          email,
-                          style: TextStyle(
-                            color: textPrimary,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  onPressed: _downloadHTML,
+                  icon: const Icon(Icons.html, size: 16),
+                  label: const Text("HTML"),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF333333)),
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(width: 10),
-
-          // LinkedIn button
-          ElevatedButton.icon(
-            onPressed: () => _launchURL(linkedInUrl),
-            icon: const Icon(Icons.open_in_new, size: 14),
-            label: const Text("LinkedIn"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0A66C2),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Text(
-        "Start searching leads",
-        style: TextStyle(color: textSecondary),
+  // UI HELPERS
+  Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(text.toUpperCase(), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)));
+
+  Widget _buildListInput(TextEditingController controller, List<String> list, String hint) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      TextField(
+        controller: controller,
+        onSubmitted: (val) { if (val.trim().isNotEmpty) { setState(() => list.add(val.trim())); controller.clear(); } },
+        style: const TextStyle(color: Colors.white, fontSize: 13),
+        decoration: InputDecoration(hintText: hint, hintStyle: const TextStyle(color: Colors.white12), filled: true, fillColor: Colors.black26, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none)),
       ),
-    );
+      if (list.isNotEmpty) Wrap(spacing: 6, children: list.map((t) => Chip(label: Text(t, style: const TextStyle(fontSize: 10, color: Colors.white)), backgroundColor: const Color(0xFFF54A00).withOpacity(0.2), onDeleted: () => setState(() => list.remove(t)))).toList()),
+    ]);
+  }
+
+  Widget _buildDropdown(List<String> items, String current, Function(String?) onChange) {
+    return Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)), child: DropdownButton<String>(value: current, isExpanded: true, dropdownColor: const Color(0xFF161616), underline: Container(), items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(color: Colors.white, fontSize: 13)))).toList(), onChanged: onChange));
+  }
+
+  Widget _buildMultiSelect(List<String> options, List<String> target) {
+    return Wrap(spacing: 6, children: options.map((s) => ChoiceChip(label: Text(s, style: TextStyle(color: target.contains(s) ? Colors.white : Colors.white38, fontSize: 10)), selected: target.contains(s), selectedColor: const Color(0xFFF54A00), backgroundColor: Colors.black26, onSelected: (val) => setState(() => val ? target.add(s) : target.remove(s)))).toList());
+  }
+
+  Widget _toggle(String label, bool val, Function(bool) fn) {
+    return FilterChip(label: Text(label, style: const TextStyle(fontSize: 10, color: Colors.white)), selected: val, selectedColor: const Color(0xFFF54A00), onSelected: fn, showCheckmark: false, backgroundColor: Colors.black26);
+  }
+
+  Widget _inputField(TextEditingController c, String h) => TextField(controller: c, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: InputDecoration(hintText: h, filled: true, fillColor: Colors.black26, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none)));
+
+  Widget _buildResultsList() {
+    if (_leads.isEmpty) return const Center(child: Text("No leads found.", style: TextStyle(color: Colors.white10)));
+    return Column(children: [
+      Container(padding: const EdgeInsets.all(24), alignment: Alignment.centerLeft, child: Text("FOUND ${_leads.length} LEADS", style: const TextStyle(color: Color(0xFFF54A00), fontWeight: FontWeight.bold, fontSize: 12))),
+      Expanded(child: ListView.builder(padding: const EdgeInsets.symmetric(horizontal: 24), itemCount: _leads.length, itemBuilder: (c, i) => Container(margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: const Color(0xFF161616), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)), child: ListTile(leading: const CircleAvatar(backgroundColor: Color(0xFF222222), child: Icon(Icons.person, color: Colors.white, size: 20)), title: Text(_leads[i].name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), subtitle: Text(_leads[i].email, style: const TextStyle(color: Color(0xFFF54A00), fontSize: 12)), trailing: IconButton(icon: const Icon(Icons.open_in_new, color: Colors.blue, size: 20), onPressed: () => launchUrl(Uri.parse(_leads[i].linkedin))))))),
+    ]);
   }
 }
+
+// import 'package:flutter/material.dart';
+// import 'dart:convert';
+// import 'package:http/http.dart' as http;
+// import 'package:url_launcher/url_launcher.dart';
+
+// void main() => runApp(const MaterialApp(home: LinkedInLeadGen(), debugShowCheckedModeBanner: false));
+
+// class Lead {
+//   final String name, email, linkedin, industry;
+//   Lead({required this.name, required this.email, required this.linkedin, required this.industry});
+
+//   factory Lead.fromJson(Map<String, dynamic> json) => Lead(
+//     name: json['name'] ?? 'Unknown',
+//     email: json['email'] ?? 'N/A',
+//     linkedin: json['linkedinurl'] ?? '',
+//     industry: json['industry'] ?? 'N/A',
+//   );
+// }
+
+// class LinkedInLeadGen extends StatefulWidget {
+//   const LinkedInLeadGen({super.key});
+//   @override
+//   State<LinkedInLeadGen> createState() => _LinkedInLeadGenState();
+// }
+
+// class _LinkedInLeadGenState extends State<LinkedInLeadGen> {
+//   // --- CONFIGURATION ---
+//   final List<String> _countries = [
+//     "United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "India", 
+//     "Singapore", "Netherlands", "United Arab Emirates", "Brazil", "Spain", "Italy", "Mexico", 
+//     "Japan", "Sweden", "Switzerland", "Norway", "Ireland", "New Zealand", "South Africa", 
+//     "Poland", "Belgium", "Denmark", "Israel"
+//   ]..sort();
+
+//   final List<String> _companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"];
+//   final List<String> _seniorityOptions = ["c_suite", "vp", "director", "manager", "senior", "entry", "owner", "partner"];
+
+//   // --- CONTROLLERS ---
+//   final TextEditingController _titleController = TextEditingController();
+//   final TextEditingController _keywordController = TextEditingController();
+//   final TextEditingController _countController = TextEditingController(text: "10");
+  
+//   // --- STATE ---
+//   List<String> _jobTitles = [];
+//   List<String> _companyKeywords = [];
+//   List<String> _selectedCompanySizes = [];
+//   List<String> _selectedSeniority = [];
+//   String _selectedCountry = "United States";
+//   bool _hasEmail = true;
+//   bool _hasPhone = false;
+//   bool _isLoading = false;
+//   List<Lead> _leads = [];
+
+//   // --- WEBHOOK EXECUTION ---
+//   Future<void> _launchAgent() async {
+//     // 1. FORCED SYNC: Capture any un-submitted text in the controllers
+//     if (_titleController.text.trim().isNotEmpty) {
+//       if (!_jobTitles.contains(_titleController.text.trim())) {
+//         _jobTitles.add(_titleController.text.trim());
+//       }
+//       _titleController.clear();
+//     }
+//     if (_keywordController.text.trim().isNotEmpty) {
+//       if (!_companyKeywords.contains(_keywordController.text.trim())) {
+//         _companyKeywords.add(_keywordController.text.trim());
+//       }
+//       _keywordController.clear();
+//     }
+
+//     setState(() => _isLoading = true);
+    
+//     // 2. BUILD PAYLOAD: Exactly matching your requested JSON format
+//     final payload = {
+//       "companyKeywordIncludes": _companyKeywords,
+//       "companySizeIncludes": _selectedCompanySizes,
+//       "personTitleIncludes": _jobTitles,
+//       "seniorityIncludes": _selectedSeniority,
+//       "personLocationCountryIncludes": [_selectedCountry],
+//       "hasEmail": _hasEmail,
+//       "hasPhone": _hasPhone,
+//       "totalResults": int.tryParse(_countController.text) ?? 10,
+//       "dontSaveProgress": false,
+//       "resetProgress": false,
+//       "includeTitleVariants": false,
+//     };
+
+//     try {
+//       final response = await http.post(
+//         Uri.parse(
+//           "https://abuyousufmdjumman.n8nclouds.com/webhook/f9a40868-7359-47ee-bece-dc62d26237d3"
+          
+//           // "https://abuyousufmdjumman.n8nclouds.com/webhook-test/f9a40868-7359-47ee-bece-dc62d26237d3"
+          
+//           ),
+//         headers: {"Content-Type": "application/json"},
+//         body: jsonEncode(payload),
+//       );
+
+//       if (response.statusCode == 200) {
+//         final List<dynamic> data = jsonDecode(response.body);
+//         setState(() => _leads = data.map((e) => Lead.fromJson(e)).toList());
+//       }
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
+//     } finally {
+//       setState(() => _isLoading = false);
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.black,
+//       body: Row(children: [
+//         // SIDEBAR (380px)
+//         Container(
+//           width: 380,
+//           color: const Color(0xFF0D0D0E),
+//           padding: const EdgeInsets.all(24),
+//           child: SingleChildScrollView(
+//             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+//               const Text("B2B LEAD PRO", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+//               const SizedBox(height: 30),
+              
+//               _label("Job Titles (Add multiple)"),
+//               _buildListInput(_titleController, _jobTitles, "e.g. CEO, Founder"),
+              
+//               const SizedBox(height: 20),
+//               _label("Company Keywords"),
+//               _buildListInput(_keywordController, _companyKeywords, "e.g. SaaS, Marketing"),
+              
+//               const SizedBox(height: 25),
+//               _label("Target Country"),
+//               _buildDropdown(_countries, _selectedCountry, (val) => setState(() => _selectedCountry = val!)),
+              
+//               const SizedBox(height: 25),
+//               _label("Company Size"),
+//               _buildMultiSelect(_companySizes, _selectedCompanySizes),
+              
+//               const SizedBox(height: 25),
+//               _label("Seniority"),
+//               _buildMultiSelect(_seniorityOptions, _selectedSeniority),
+              
+//               const SizedBox(height: 25),
+//               _label("Data Verification"),
+//               Row(children: [
+//                 _toggle("Verified Email", _hasEmail, (v) => setState(() => _hasEmail = v)),
+//                 const SizedBox(width: 10),
+//                 _toggle("With Phone", _hasPhone, (v) => setState(() => _hasPhone = v)),
+//               ]),
+              
+//               const SizedBox(height: 20),
+//               _label("Fetch Limit"), _inputField(_countController, "10"),
+              
+//               const SizedBox(height: 40),
+//               SizedBox(
+//                 width: double.infinity, height: 55,
+//                 child: ElevatedButton(
+//                   onPressed: _isLoading ? null : _launchAgent,
+//                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF54A00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+//                   child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text("LAUNCH AGENT", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+//                 ),
+//               )
+//             ]),
+//           ),
+//         ),
+//         // MAIN CONTENT AREA
+//         Expanded(child: _buildResultsList()),
+//       ]),
+//     );
+//   }
+
+//   // --- UI HELPER WIDGETS ---
+
+//   Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(text.toUpperCase(), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)));
+
+//   Widget _buildListInput(TextEditingController controller, List<String> list, String hint) {
+//     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+//       TextField(
+//         controller: controller,
+//         onSubmitted: (val) { if (val.trim().isNotEmpty) { setState(() => list.add(val.trim())); controller.clear(); } },
+//         style: const TextStyle(color: Colors.white, fontSize: 13),
+//         decoration: InputDecoration(
+//           hintText: hint, 
+//           hintStyle: const TextStyle(color: Colors.white12),
+//           filled: true, 
+//           fillColor: Colors.black26, 
+//           suffixIcon: IconButton(icon: const Icon(Icons.add_circle, color: Color(0xFFF54A00)), onPressed: () { if (controller.text.trim().isNotEmpty) { setState(() => list.add(controller.text.trim())); controller.clear(); } }),
+//           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none)
+//         ),
+//       ),
+//       if (list.isNotEmpty) const SizedBox(height: 10),
+//       Wrap(spacing: 6, runSpacing: 6, children: list.map((t) => Chip(
+//         label: Text(t, style: const TextStyle(fontSize: 10, color: Colors.white)),
+//         backgroundColor: const Color(0xFFF54A00).withOpacity(0.2),
+//         onDeleted: () => setState(() => list.remove(t)),
+//         deleteIconColor: Colors.white54,
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+//       )).toList()),
+//     ]);
+//   }
+
+//   Widget _buildDropdown(List<String> items, String current, Function(String?) onChange) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 12),
+//       decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)),
+//       child: DropdownButton<String>(
+//         value: current, isExpanded: true, dropdownColor: const Color(0xFF161616), underline: Container(),
+//         items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(color: Colors.white, fontSize: 13)))).toList(),
+//         onChanged: onChange,
+//       ),
+//     );
+//   }
+
+//   Widget _buildMultiSelect(List<String> options, List<String> target) {
+//     return Wrap(spacing: 6, runSpacing: 6, children: options.map((s) {
+//       bool isSelected = target.contains(s);
+//       return ChoiceChip(
+//         label: Text(s, style: TextStyle(color: isSelected ? Colors.white : Colors.white38, fontSize: 10)),
+//         selected: isSelected, selectedColor: const Color(0xFFF54A00), backgroundColor: Colors.black26,
+//         onSelected: (val) => setState(() => val ? target.add(s) : target.remove(s)),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+//       );
+//     }).toList());
+//   }
+
+//   Widget _toggle(String label, bool val, Function(bool) fn) {
+//     return FilterChip(
+//       label: Text(label, style: const TextStyle(fontSize: 10, color: Colors.white)),
+//       selected: val, selectedColor: const Color(0xFFF54A00), onSelected: fn, showCheckmark: false,
+//       backgroundColor: Colors.black26, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+//     );
+//   }
+
+//   Widget _inputField(TextEditingController c, String h) => TextField(controller: c, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: InputDecoration(hintText: h, filled: true, fillColor: Colors.black26, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none)));
+
+//   Widget _buildResultsList() {
+//     if (_leads.isEmpty) return const Center(child: Text("Ready to scrape. Enter details and launch.", style: TextStyle(color: Colors.white10)));
+//     return Column(children: [
+//       Container(padding: const EdgeInsets.all(24), alignment: Alignment.centerLeft, child: Text("FOUND ${_leads.length} LEADS", style: const TextStyle(color: Color(0xFFF54A00), fontWeight: FontWeight.bold, fontSize: 12))),
+//       Expanded(
+//         child: ListView.builder(
+//           padding: const EdgeInsets.symmetric(horizontal: 24),
+//           itemCount: _leads.length,
+//           itemBuilder: (c, i) => Container(
+//             margin: const EdgeInsets.only(bottom: 12),
+//             decoration: BoxDecoration(color: const Color(0xFF161616), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
+//             child: ListTile(
+//               leading: const CircleAvatar(backgroundColor: Color(0xFF222222), child: Icon(Icons.person, color: Colors.white, size: 20)),
+//               title: Text(_leads[i].name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+//               subtitle: Text(_leads[i].email, style: const TextStyle(color: Color(0xFFF54A00), fontSize: 12)),
+//               trailing: IconButton(icon: const Icon(Icons.open_in_new, color: Colors.blue, size: 20), onPressed: () => launchUrl(Uri.parse(_leads[i].linkedin))),
+//             ),
+//           ),
+//         ),
+//       ),
+//     ]);
+//   }
+// }

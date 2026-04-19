@@ -52,7 +52,7 @@ class AppSidebar extends StatelessWidget {
             ),
           ),
 
-          // 🔹 Bottom section (User + Logout + Credits)
+       
           const Divider(color: Colors.white10),
 
           if (user != null) _userInfo(user),
@@ -65,7 +65,7 @@ class AppSidebar extends StatelessWidget {
     );
   }
 
-  // 🔹 Section header
+  //  Section header
   Widget _header(String title) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
         child: Text(
@@ -74,7 +74,7 @@ class AppSidebar extends StatelessWidget {
         ),
       );
 
-  // 🔹 Menu item
+  //  Menu item
   Widget _item(IconData icon, String label, int index) {
     bool isSelected = selectedIndex == index;
 
@@ -90,7 +90,7 @@ class AppSidebar extends StatelessWidget {
     );
   }
 
-  // 🔹 User info
+  //  User info
   Widget _userInfo(User user) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -114,7 +114,7 @@ class AppSidebar extends StatelessWidget {
     );
   }
 
-  // 🔹 Logout button
+  //  Logout button
 Widget _logoutButton(BuildContext context) {
   return ListTile(
     leading: const Icon(Icons.logout, color: Colors.red),

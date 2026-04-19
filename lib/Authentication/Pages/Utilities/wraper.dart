@@ -22,7 +22,7 @@ class _wraperClass extends State<wraper> {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
 
-          // 🔹 loading
+          
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }

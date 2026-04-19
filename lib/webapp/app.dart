@@ -18,7 +18,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _screens = [
     const PostGenScreen(),
-    const LinkedInLeadGenScreen() ,
+    const LinkedInLeadGen() ,
     const LinkedInAccountScreen(),
     const SubscriptionScreen(),
     const ProfileScreen(),
